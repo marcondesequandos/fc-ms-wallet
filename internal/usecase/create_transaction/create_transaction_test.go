@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com.br/fc-ms-wallet/internal/entity"
+	"github.com.br/fc-ms-wallet/internal/event"
+	"github.com.br/fc-ms-wallet/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -30,7 +32,7 @@ func (m *AccountGatewayMock) FindByID(id string) (*entity.Account, error) {
 	return args.Get(0).(*entity.Account), args.Error(1)
 }
 
-func TestCreateTranssactionUseCase_Execute(t *testing.T) {
+func TestCreateTransactionUseCase_Execute(t *testing.T) {
 	client1, _ := entity.NewClient("client1", "j@j.com")
 	account1 := entity.NewAccount(client1)
 	account1.Credit(1000)
@@ -52,7 +54,10 @@ func TestCreateTranssactionUseCase_Execute(t *testing.T) {
 		Amount:        100,
 	}
 
-	uc := NewCreateTransactionUseCase(mockTransaction, mockAccount)
+	dispatcher := events.NewEventDispatcher()
+	event := event.NewTransactionCreated()
+
+	uc := NewCreateTransactionUseCase(mockTransaction, mockAccount, dispatcher, event)
 	output, err := uc.Execute(inputDto)
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
