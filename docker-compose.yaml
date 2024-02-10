@@ -11,4 +11,4 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - /home/felipe/develop/full_cycle/fc_wallet_core/docker/mysql:/var/lib/mysql
+      - .docker/mysql:/var/lib/mysql
