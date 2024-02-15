@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com.br/fc-ms-wallet/internal/usecase/create_client"
@@ -20,7 +19,6 @@ func NewWebClientHandler(createClientUseCase create_client.CreateClientUSeCase) 
 
 func (h *WebClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 	var dto create_client.CreateClientInputDTO
-	fmt.Println("dtoclient", dto)
 
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	if err != nil {
@@ -29,9 +27,7 @@ func (h *WebClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) 
 	}
 
 	output, err := h.CreateClientUseCase.Execute(dto)
-	fmt.Println("outputucclient", output)
 	if err != nil {
-		fmt.Println("err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
