@@ -7,13 +7,16 @@ import (
 
 	"github.com.br/fc-ms-wallet/internal/database"
 	"github.com.br/fc-ms-wallet/internal/event"
+	"github.com.br/fc-ms-wallet/internal/event/handler"
 	"github.com.br/fc-ms-wallet/internal/usecase/create_account"
 	"github.com.br/fc-ms-wallet/internal/usecase/create_client"
 	"github.com.br/fc-ms-wallet/internal/usecase/create_transaction"
 	"github.com.br/fc-ms-wallet/internal/web"
 	"github.com.br/fc-ms-wallet/internal/web/webserver"
 	"github.com.br/fc-ms-wallet/pkg/events"
+	"github.com.br/fc-ms-wallet/pkg/kafka"
 	"github.com.br/fc-ms-wallet/pkg/uow"
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -24,9 +27,15 @@ func main() {
 	}
 	defer db.Close()
 
+	configMap := ckafka.ConfigMap{
+		"bootstrap.servers": "kafka:9094",
+		"group.id":          "wallet",
+	}
+	kafkaProducer := kafka.NewKafkaProducer(&configMap)
+
 	eventDispatcher := events.NewEventDispatcher()
+	eventDispatcher.Register("TransactionCreated", handler.NewTransactionCreatedKafkaHandler(kafkaProducer))
 	transactionCreatedEvent := event.NewTransactionCreated()
-	// eventDispatcher.Register("TransactionCreated", handler)
 
 	clientDb := database.NewClientDB(db)
 	accountDb := database.NewAccountDB(db)
